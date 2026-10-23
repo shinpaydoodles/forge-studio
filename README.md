@@ -4,7 +4,7 @@ Forge Studio is a local-first Windows development workspace for project-scoped A
 
 ## Current status (2026-10-23)
 
-The React interface and Node runtime run locally. Project import/settings, SQLite task and event persistence, manual and plan-first tasks, approvals, cancellation, Markdown browsing and reviewed edits, and Git status/diff are implemented. A real Codex App Server turn streamed through the UI and required human review before completion. The Claude Agent SDK adapter is implemented but cannot be live-tested here without an Anthropic API key. Roblox Studio MCP, Blender, general MCP management, Git write operations, coordinated multi-agent workflows, and automatic documentation edits are planned.
+The React interface and Node runtime run locally. Project import/settings, SQLite task and event persistence, manual and plan-first tasks, approvals, cancellation, Markdown browsing and reviewed edits, and Git status/diff are implemented. Real Codex App Server turns streamed through the UI; assisted plan approval, rejection, Stop, and human outcome review were verified. A reviewed Markdown edit was applied through the UI in a disposable folder. The Claude Agent SDK adapter is implemented but cannot be live-tested here without an Anthropic API key. Roblox Studio MCP, Blender, general MCP management, Git write operations, coordinated multi-agent workflows, and automatic documentation edits are planned.
 
 See [implementation status](docs/development/status.md) for verified evidence and limitations.
 

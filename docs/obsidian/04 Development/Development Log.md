@@ -14,6 +14,7 @@ tags: [forge-studio, development]
 - Verified the Vite UI in a browser and passed five runtime tests. Rust stable MSVC was installed for native build validation.
 - Created linked project documentation in the existing Obsidian vault's `2026 PROJECTS` convention.
 - A live manual Codex turn streamed in the browser UI. Human review now gates completion, and a Git snapshot is recorded at provider finish.
+- In a disposable project, approved an assisted Codex plan and received `EXECUTED_OK`, rejected a second plan, stopped an active manual turn, and confirmed project/task history after UI reload. A reviewed Markdown edit was applied through the UI and verified on disk.
 - Built and installed the NSIS package. Fixed packaged Node startup on paths containing spaces and verified that the native shell launches its loopback runtime.
 - Created and verified a private `shinpaydoodles/forge-studio` repository, then pushed the initial `main` commit.
-- Still to verify: native UI, clean-machine launch, Claude with an API key, Codex tool approval/cancellation, and external MCP connections.
+- Still to verify: native UI, clean-machine launch, Claude with an API key, Codex command/file tool approval, and external MCP connections.

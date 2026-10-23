@@ -10,7 +10,7 @@ tags: [forge-studio, development]
 1. [x] Initialize separate pnpm workspace, React UI, Node runtime, SQLite schema, and Tauri shell source.
 2. [x] Implement project import/settings, manual/assisted task states, approvals, streaming, note browsing, reviewed edits, and Git status/diff.
 3. [x] Add tests for persistence, task transitions, path escape, Markdown conflicts, and redaction.
-4. [ ] Verify Codex App Server with a real read-only task and approval/cancellation flow.
+4. [x] Verify Codex App Server with real read-only tasks, plan approval/rejection, and cancellation. Command/file tool approval needs a separate check.
 5. [ ] Configure a separately billed Claude API key and verify SDK execution.
 6. [ ] Build and launch the NSIS package on Windows, then test a clean installation.
 7. [x] Create/push `forge-studio` to a verified private GitHub repository.

@@ -15,10 +15,10 @@ Forge Studio is a local-first Windows desktop development workspace. It is a sep
 | Area | Verified | Next check |
 |---|---|---|
 | React UI and local runtime | Browser UI inspected; packaged shell and Node runtime started | Native UI and clean-machine test |
-| SQLite project and task storage | Tests pass | Real project flow |
-| Codex App Server | Live streamed UI turn and human review passed | Tool approval and cancellation |
+| SQLite project and task storage | Tests and project/task reload passed | Packaged UI flow |
+| Codex App Server | Manual and assisted turns, approve/reject, Stop, and human review passed | Command/file tool approval |
 | Claude Agent SDK | Installed | API key and live turn |
-| Markdown knowledge | Temporary vault tests pass | App flow with this folder |
+| Markdown knowledge | Disposable note read, reviewed, and applied in UI | Focused diff view |
 | GitHub | Private `shinpaydoodles/forge-studio`, `main` pushed | App GitHub write UI |
 
 ## Navigate
