@@ -1,0 +1,23 @@
+{
+  "name": "forge-studio",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.11.0",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "pnpm --filter @forge/runtime build && pnpm --filter @forge/desktop build",
+    "check": "pnpm -r typecheck && pnpm -r test",
+    "test": "pnpm -r test",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "sync:obsidian": "node scripts/sync-obsidian-docs.mjs",
+    "desktop:dev": "node scripts/desktop-dev.mjs",
+    "desktop:build": "node scripts/prepare-runtime.mjs && pnpm --filter @forge/desktop tauri build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript-eslint": "^8.48.0"
+  }
+}

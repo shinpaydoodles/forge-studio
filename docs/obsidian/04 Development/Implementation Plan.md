@@ -1,0 +1,20 @@
+---
+type: implementation-plan
+project: Forge Studio
+status: active
+created: 2026-10-23
+tags: [forge-studio, development]
+---
+# Implementation Plan
+
+1. [x] Initialize separate pnpm workspace, React UI, Node runtime, SQLite schema, and Tauri shell source.
+2. [x] Implement project import/settings, manual/assisted task states, approvals, streaming, note browsing, reviewed edits, and Git status/diff.
+3. [x] Add tests for persistence, task transitions, path escape, Markdown conflicts, and redaction.
+4. [ ] Verify Codex App Server with a real read-only task and approval/cancellation flow.
+5. [ ] Configure a separately billed Claude API key and verify SDK execution.
+6. [ ] Build and launch the NSIS package on Windows, then test a clean installation.
+7. [ ] Create/push `forge-studio` to a verified private GitHub repository.
+8. [ ] Add safe Git write operations and MCP connection management.
+9. [ ] Add official Roblox Studio MCP and a vetted Blender workflow.
+
+Each later phase requires real execution evidence. See [[04 Development/Testing and QA|Testing and QA]] and [[04 Development/Known Issues|Known Issues]].

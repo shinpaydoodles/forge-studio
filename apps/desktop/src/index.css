@@ -1,0 +1,35 @@
+:root {
+  font-family: Inter, "Segoe UI", sans-serif;
+  color: #e9edf4;
+  background: #10151d;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 760px;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #5d98ff;
+  outline-offset: 2px;
+}
+pre {
+  font-family: Consolas, monospace;
+}
+#root {
+  min-height: 100vh;
+}
