@@ -8,3 +8,4 @@
 - **Roblox Studio:** Roblox's built-in MCP server is the recommended official interface. A live Studio connection has not been tested.
 - **Blender:** No bridge selected or connected. Use the Blender Python API only after reviewing a vetted bridge and its license.
 - **VS Code:** CLI detection is displayed. Opening files from the UI is not implemented yet.
+- **Forge CLI (planned):** Define a versioned local interface, make connection opt-in, map project context, and hand off tasks with visible logs and the same approval boundaries. No Forge CLI connection is implemented today.

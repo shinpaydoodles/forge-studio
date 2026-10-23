@@ -12,6 +12,6 @@
 | Tauri packaging       | Built and locally installed           | NSIS installer built; packaged shell started the Node loopback runtime. Native UI and clean-machine startup need further checks.                                            |
 | MCP manager           | Discovery tested                      | Official TypeScript SDK stdio handshake, tool listing, disconnect, and per-project permissions passed an integration test and browser UI check. Tool calls are not exposed. |
 | Roblox, Blender       | Planned                               | No live application connection.                                                                                                                                             |
-| GitHub remote         | Private repository pushed             | GitHub reports `shinpaydoodles/forge-studio` private; local `main` tracks `origin/main`.                                                                                    |
+| GitHub remote         | Repository pushed                     | Local `main` tracks `origin/main`; repository visibility is controlled by its owner.                                                                                        |
 
 The next milestone is native UI and clean-machine testing, then permissioned MCP tool invocation, a live Codex command/file approval check, and Claude execution with an API key. See the Obsidian [[2026 PROJECTS/Forge Studio/04 Development/Development Log|Development Log]] for dated notes.

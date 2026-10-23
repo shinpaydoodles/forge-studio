@@ -1,78 +1,81 @@
 # Forge Studio
 
-Forge Studio is a local-first Windows development workspace for project-scoped AI tasks, Git inspection, and Obsidian Markdown notes. This repository is separate from Forge CLI and Catch a Slime.
+Forge Studio is a local-first Windows desktop workspace for AI-assisted development. It brings project context, coding tasks, Markdown knowledge, Git inspection, and local tool connections into one application.
 
-## Current status (2026-10-23)
+The application uses a Tauri 2 shell, a React interface, and a TypeScript Node.js runtime. Project and task data stay in a local SQLite database.
 
-The React interface and Node runtime run locally. Project import/settings, SQLite task and event persistence, manual and plan-first tasks, approvals, cancellation, Markdown browsing and reviewed edits, and Git status/diff are implemented. Real Codex App Server turns streamed through the UI; assisted plan approval, rejection, Stop, and human outcome review were verified. A reviewed Markdown edit was applied through the UI in a disposable folder. The local MCP manager now saves stdio servers, explicitly connects and inspects tools, disconnects, and stores per-project tool switches. Tool invocation by agents is not yet available. The Claude Agent SDK adapter is implemented but cannot be live-tested here without an Anthropic API key. Roblox Studio MCP, Blender, Git write operations, coordinated multi-agent workflows, and automatic documentation edits are planned.
+## What works today
 
-See [implementation status](docs/development/status.md) for verified evidence and limitations.
+| Area            | Current capability                                                                                                                                         |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Projects        | Import an existing directory, choose a project-specific Markdown folder, and persist settings.                                                             |
+| Agent workspace | Run Codex tasks in manual or plan-first assisted mode. Stream responses, approve or reject assisted plans, stop work, and review the outcome.              |
+| Claude          | Agent SDK adapter is implemented; a live run requires `ANTHROPIC_API_KEY`.                                                                                 |
+| Knowledge base  | Search and read Markdown notes, preview proposed edits, and apply reviewed changes.                                                                        |
+| Git & changes   | Inspect the current branch, working tree status, and unstaged diff.                                                                                        |
+| MCP connections | Add trusted local stdio servers, connect and inspect advertised tools, and store per-project tool permissions. Forge Studio does not invoke MCP tools yet. |
+| Activity        | Reopen persisted tasks, events, and decisions.                                                                                                             |
 
-## Requirements
+The [implementation status](docs/development/status.md) records verified behavior and open checks. Planned integrations are listed in the [roadmap](#roadmap).
 
-- Windows 11, Node.js 24, pnpm 9, Git.
-- Rust stable MSVC and Visual Studio C++ Build Tools for Tauri development/builds.
-- Codex CLI installed and `codex login` for Codex tasks.
-- `ANTHROPIC_API_KEY` for Claude Agent SDK tasks. This uses separately billed Anthropic API access; Claude.ai subscription login is not exposed to this third-party application by the current SDK terms.
+## Run from source
 
-## Development
+Development requires Windows 11, Node.js 24, pnpm 9, and Git. Native Tauri builds also require Rust stable with the MSVC toolchain and Visual Studio C++ Build Tools.
 
 ```powershell
 pnpm install
 pnpm dev
 ```
 
-Open `http://127.0.0.1:5173`. The command launches the Vite UI and loopback runtime with a shared random session token.
+Open `http://127.0.0.1:5173`. This starts the React UI and local runtime with a shared random development token.
 
-For the native Tauri window:
+To open the native development window, run `pnpm desktop:dev`. To create a Windows installer, run `pnpm desktop:build`; the NSIS setup file is written to `apps/desktop/src-tauri/target/release/bundle/nsis/`. A public release download is not available yet.
 
-```powershell
-pnpm desktop:dev
-```
+## Configure an agent
 
-The app stores SQLite state under `%APPDATA%\Forge Studio\forge.db`, or `FORGE_DATA_DIR` if set. The database and tokens are ignored by Git.
+1. Import an existing project directory. Importing does not change its files.
+2. Optionally select a project-specific Markdown folder, such as a folder in an Obsidian vault.
+3. Install the Codex CLI and run `codex login` before starting Codex tasks. Forge Studio uses the Codex App Server from that installation.
+4. For Claude tasks, set `ANTHROPIC_API_KEY` in your local environment before starting Forge Studio. Do not commit the key.
+5. Choose **Manual** to start a task immediately or **Assisted** to review a plan first. Review the response and Git snapshot before accepting the task outcome.
 
-## Verification and packaging
+For MCP, add a trusted local server command in **MCP Connections**, enter its arguments as a JSON array, and select **Connect & inspect**. Project tool switches are stored for future workflows; they do not enable tool execution in the current release. Avoid putting credentials in command arguments.
 
-```powershell
-pnpm check
-pnpm build
-pnpm desktop:build
-```
-
-The desktop build prepares a private runtime bundle, copies the installed Node executable as a Tauri resource, then creates an NSIS installer at `apps/desktop/src-tauri/target/release/bundle/nsis/`. The installer was built and installed on this Windows machine, and the packaged shell started its loopback runtime. Clean-machine startup and shutdown still need verification before distribution. Code signing and update distribution remain open. Startup output is written to the Tauri app log directory as `runtime.log`.
-
-## Setup
-
-1. Import a project by entering its existing absolute directory. Import does not edit the directory.
-2. Optionally enter a project-specific folder inside an Obsidian vault. Notes remain ordinary local Markdown files.
-3. Run `codex login` before using Codex. The adapter starts the official Codex App Server and uses its existing sign-in.
-4. To use Claude, set `ANTHROPIC_API_KEY` in the environment before starting Forge Studio. Keep the key out of repository files.
-5. Choose Manual to execute immediately, or Assisted to generate a read-only plan and approve it before execution. After the provider finishes, review its response and Git snapshot, then accept or mark the task unsuccessful.
-6. In MCP Connections, add a trusted local stdio server command and its arguments as a JSON array, then choose Connect & inspect. Enabling a discovered tool records project permission for future workflows; no MCP tool calls are made in this release. Avoid putting credentials in command arguments.
-
-## Architecture
+## Architecture and local data
 
 ```mermaid
 flowchart LR
   UI[React + Vite UI] -->|Bearer token, loopback| Runtime[Node TypeScript runtime]
   Tauri[Tauri 2 shell] --> UI
-  Tauri -->|launches packaged Node| Runtime
+  Tauri -->|launches bundled Node| Runtime
   Runtime --> DB[(SQLite)]
   Runtime --> Codex[Codex App Server]
   Runtime --> Claude[Claude Agent SDK]
   Runtime --> Git[Git CLI]
   Runtime --> Docs[Authorized Markdown folder]
+  Runtime --> MCP[Local MCP servers]
 ```
 
-See [architecture](docs/architecture/overview.md), [security model](docs/security/model.md), and [integration notes](docs/integrations.md).
+The runtime binds to `127.0.0.1`, requires a bearer token, and checks browser origins. Direct Markdown operations resolve real paths and reject traversal or junction escapes. Agent process isolation depends on the provider and is not a hardened sandbox. Interrupted tasks are marked paused after a restart and are not replayed automatically.
 
-## Security and troubleshooting
+SQLite state is stored under `%APPDATA%\Forge Studio\forge.db`, or under `FORGE_DATA_DIR` when set. Database files, logs, credentials, and generated runtime bundles are excluded from Git. See the [architecture](docs/architecture/overview.md), [security model](docs/security/model.md), and [integration notes](docs/integrations.md).
 
-The local API binds to `127.0.0.1`, requires a random bearer token, checks browser origins, and keeps database files out of Git. Direct Markdown operations resolve real paths and reject traversal and junction escapes. Agent process isolation is provider dependent; do not treat this as a hardened sandbox. Inspect each approval request before accepting. Restarting marks interrupted tasks as paused and does not replay them automatically.
+## Roadmap
 
-If the UI shows “Unauthorized,” start both services with `pnpm dev` so they share a token. If Codex fails, run `codex login status` and check the task error. If Claude fails, check `ANTHROPIC_API_KEY` and Anthropic API billing. If the Tauri build fails, confirm Rust MSVC and C++ Build Tools are available.
+- Complete native UI and clean-machine installer checks, then verify the remaining provider approval flows.
+- Add reviewed Git write actions and permissioned MCP tool calls with audit records.
+- Connect and test supported Roblox Studio, Blender, and VS Code workflows.
+- Add bounded coordinated tasks with planning, implementation, review, QA, and documentation stages.
+- **Connect Forge CLI and Forge Studio:** define a versioned local interface for Forge CLI, let users opt into a connection, map both tools to the same project context, and hand off tasks with visible logs and approval boundaries. This integration is planned; the two tools do not communicate today.
+
+## Verify
+
+```powershell
+pnpm check
+pnpm lint
+pnpm build
+```
 
 ## License
 
-No license has been chosen for Forge Studio. The repository should remain private until a license decision is made. Third-party dependencies retain their own licenses.
+Forge Studio's own source code is licensed under the [MIT License](LICENSE). Third-party components keep their own licenses or terms. In particular, the [Claude Agent SDK is governed by Anthropic's terms](https://github.com/anthropics/claude-agent-sdk-typescript/blob/main/LICENSE.md); review them before redistributing a packaged installer.

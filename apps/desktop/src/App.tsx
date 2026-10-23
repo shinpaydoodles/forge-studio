@@ -461,7 +461,7 @@ function App() {
                             name: e.target.value,
                           })
                         }
-                        placeholder="e.g. Catch a Slime"
+                        placeholder="e.g. My Game"
                       />
                     </label>
                     <label>
@@ -488,7 +488,7 @@ function App() {
                             docsRoot: e.target.value,
                           })
                         }
-                        placeholder="C:\Users\…\VAULT\2026 PROJECTS\…"
+                        placeholder="C:\path\to\project-notes"
                       />
                     </label>
                     <div className="form-grid">

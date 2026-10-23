@@ -1,6 +1,6 @@
 # Forge Studio agent instructions
 
-- Keep Forge Studio separate from Forge CLI and all imported user projects.
+- Keep code changes for Forge Studio within this repository. Access imported projects only through user-authorized workflows.
 - Treat imported project roots and documentation folders as explicit authorization boundaries. Resolve real paths before direct filesystem operations.
 - Do not claim an agent, MCP server, Roblox Studio, Blender, or GitHub connection is working without a live check.
 - Never auto-approve an agent's destructive or sensitive tool operation. Persist approval decisions and task events.

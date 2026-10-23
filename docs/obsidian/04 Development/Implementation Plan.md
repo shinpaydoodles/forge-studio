@@ -13,7 +13,7 @@ tags: [forge-studio, development]
 4. [x] Verify Codex App Server with real read-only tasks, plan approval/rejection, and cancellation. Command/file tool approval needs a separate check.
 5. [ ] Configure a separately billed Claude API key and verify SDK execution.
 6. [ ] Build and launch the NSIS package on Windows, then test a clean installation.
-7. [x] Create/push `forge-studio` to a verified private GitHub repository.
+7. [x] Create/push `forge-studio` to a verified GitHub repository.
 8. [ ] Add safe Git write operations and reviewed MCP tool invocation. Local connection management is implemented.
 9. [ ] Add official Roblox Studio MCP and a vetted Blender workflow.
 

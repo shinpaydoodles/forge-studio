@@ -19,6 +19,6 @@ tags: [forge-studio, testing]
 - [x] Apply a reviewed Markdown change in a disposable test folder through the UI.
 - [x] Verify NSIS installer launches the native shell and bundled runtime.
 - [ ] Verify native UI interaction and clean shutdown on a clean machine.
-- [x] Check tracked paths, secret patterns, ignored databases, and generated bundles before the private push.
+- [x] Check tracked paths, secret patterns, ignored databases, and generated bundles before the initial push.
 
 Do not run destructive tests against the real Obsidian vault or an existing Roblox place.

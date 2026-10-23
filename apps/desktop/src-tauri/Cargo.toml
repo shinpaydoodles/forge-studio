@@ -3,8 +3,8 @@ name = "forge-studio"
 version = "0.1.0"
 description = "Local-first AI development workspace"
 authors = ["Forge Studio"]
-license = ""
-repository = ""
+license = "MIT"
+repository = "https://github.com/shinpaydoodles/forge-studio"
 edition = "2024"
 rust-version = "1.90"
 
