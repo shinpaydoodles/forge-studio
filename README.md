@@ -4,7 +4,7 @@ Forge Studio is a local-first Windows development workspace for project-scoped A
 
 ## Current status (2026-10-23)
 
-The React interface and Node runtime run locally. Project import/settings, SQLite task and event persistence, Codex App Server adapter, Claude Agent SDK adapter, manual and plan-first tasks, approvals, cancellation, Markdown browsing and reviewed edits, and Git status/diff are implemented. Provider turns need authentication and a live verification in the local environment. Roblox Studio MCP, Blender, general MCP management, Git write operations, coordinated multi-agent workflows, and automatic documentation edits are planned.
+The React interface and Node runtime run locally. Project import/settings, SQLite task and event persistence, manual and plan-first tasks, approvals, cancellation, Markdown browsing and reviewed edits, and Git status/diff are implemented. A real Codex App Server turn streamed through the UI and required human review before completion. The Claude Agent SDK adapter is implemented but cannot be live-tested here without an Anthropic API key. Roblox Studio MCP, Blender, general MCP management, Git write operations, coordinated multi-agent workflows, and automatic documentation edits are planned.
 
 See [implementation status](docs/development/status.md) for verified evidence and limitations.
 
@@ -40,7 +40,7 @@ pnpm build
 pnpm desktop:build
 ```
 
-The desktop build prepares a private runtime bundle, copies the installed Node executable as a Tauri resource, then creates an NSIS installer. This is an initial packaging strategy; verify startup and shutdown on a clean Windows machine before distribution. Code signing and update distribution remain open.
+The desktop build prepares a private runtime bundle, copies the installed Node executable as a Tauri resource, then creates an NSIS installer at `apps/desktop/src-tauri/target/release/bundle/nsis/`. The installer was built and installed on this Windows machine, and the packaged shell started its loopback runtime. Clean-machine startup and shutdown still need verification before distribution. Code signing and update distribution remain open. Startup output is written to the Tauri app log directory as `runtime.log`.
 
 ## Setup
 
@@ -48,7 +48,7 @@ The desktop build prepares a private runtime bundle, copies the installed Node e
 2. Optionally enter a project-specific folder inside an Obsidian vault. Notes remain ordinary local Markdown files.
 3. Run `codex login` before using Codex. The adapter starts the official Codex App Server and uses its existing sign-in.
 4. To use Claude, set `ANTHROPIC_API_KEY` in the environment before starting Forge Studio. Keep the key out of repository files.
-5. Choose Manual to execute immediately, or Assisted to generate a read-only plan and approve it before execution.
+5. Choose Manual to execute immediately, or Assisted to generate a read-only plan and approve it before execution. After the provider finishes, review its response and Git snapshot, then accept or mark the task unsuccessful.
 
 ## Architecture
 

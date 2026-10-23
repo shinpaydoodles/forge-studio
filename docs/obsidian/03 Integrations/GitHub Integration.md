@@ -1,12 +1,12 @@
 ---
 type: integration
 project: Forge Studio
-status: pending
+status: private-repository-pushed
 created: 2026-10-23
 tags: [forge-studio, github]
 ---
 # GitHub Integration
 
-The local checkout has a Git repository. Forge Studio's UI currently shows read-only Git branch, status, and unstaged diff. GitHub authentication and repository creation are separate from the app implementation and have not been verified here.
+The local checkout has a Git repository. Forge Studio's UI currently shows read-only Git branch, status, and unstaged diff. The authenticated GitHub account is `shinpaydoodles`; the repository [shinpaydoodles/forge-studio](https://github.com/shinpaydoodles/forge-studio) exists and GitHub reports **private** visibility. Repository creation and push are performed outside the app while its GitHub UI remains unimplemented.
 
-The target repository is `forge-studio` with **private** visibility. Before push, inspect `.gitignore`, staged paths, secrets, generated binaries, SQLite, and vault material. Do not report a remote or visibility until GitHub confirms both. [[04 Development/Implementation Plan|Implementation Plan]] includes the publication gate.
+The remote URL is `https://github.com/shinpaydoodles/forge-studio.git`. Source review checked `.gitignore`, staged paths, secrets, generated binaries, SQLite, and vault material. The initial `main` commit was pushed and Git reports it tracks `origin/main`. [[04 Development/Implementation Plan|Implementation Plan]] tracks later in-app Git functionality.

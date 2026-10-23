@@ -18,6 +18,6 @@ Forge Studio should let one person select a local project, send a development ta
 - [x] Show Git branch, status, and diff.
 - [ ] Verify real Codex and Claude turns, including approval requests and cancellation.
 - [ ] Launch and package a working Tauri desktop installer.
-- [ ] Create and verify a private GitHub repository.
+- [x] Create and verify a private GitHub repository, with `main` pushed.
 
 Future scope includes structured multi-agent workflows, official Roblox Studio MCP, Blender assets, and richer VS Code coordination. See [[01 Product/Features and Scope|Features and Scope]] and [[01 Product/Roadmap|Roadmap]].

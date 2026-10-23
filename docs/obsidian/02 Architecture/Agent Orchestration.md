@@ -18,9 +18,11 @@ stateDiagram-v2
   planning --> awaiting_approval
   awaiting_approval --> executing: approved
   awaiting_approval --> cancelled: rejected
-  executing --> completed
+  executing --> awaiting_review
+  awaiting_review --> completed: accepted
+  awaiting_review --> failed: unsuccessful
   executing --> failed
   executing --> cancelled
 ```
 
-There is no concurrent coordinated mode yet. A provider's completed turn currently closes the task; independent test evidence and review stages remain planned. See [[04 Development/Known Issues|Known Issues]].
+There is no concurrent coordinated mode yet. Provider completion stores the response and a Git snapshot, then waits for a human to accept the outcome or mark it unsuccessful. Automated test and documentation stages remain planned. See [[04 Development/Known Issues|Known Issues]].
