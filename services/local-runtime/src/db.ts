@@ -41,6 +41,17 @@ export type Approval = {
   createdAt: string;
   decidedAt: string | null;
 };
+export type McpConnection = {
+  id: string;
+  name: string;
+  transport: "stdio";
+  command: string;
+  args: string[];
+  status: "disconnected" | "connected" | "error";
+  tools: { name: string; description?: string; inputSchema?: unknown }[];
+  lastAttemptAt: string | null;
+  error: string | null;
+};
 
 export class Store {
   db: DatabaseSync;
@@ -58,12 +69,17 @@ export class Store {
       CREATE TABLE IF NOT EXISTS approvals(id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(id), method TEXT NOT NULL, description TEXT NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL, decided_at TEXT);
       CREATE TABLE IF NOT EXISTS documentation_changes(id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), path TEXT NOT NULL, expected TEXT NOT NULL, proposed TEXT NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL, applied_at TEXT);
       CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS mcp_connections(id TEXT PRIMARY KEY, name TEXT NOT NULL, transport TEXT NOT NULL, command TEXT NOT NULL, args TEXT NOT NULL, status TEXT NOT NULL, tools TEXT NOT NULL, last_attempt_at TEXT, error TEXT);
+      CREATE TABLE IF NOT EXISTS project_mcp_tools(project_id TEXT NOT NULL REFERENCES projects(id), connection_id TEXT NOT NULL REFERENCES mcp_connections(id) ON DELETE CASCADE, tool_name TEXT NOT NULL, enabled INTEGER NOT NULL, PRIMARY KEY(project_id,connection_id,tool_name));
       INSERT OR IGNORE INTO schema_migrations(version) VALUES(1);`);
     this.db
       .prepare(
         "UPDATE tasks SET status='paused', stage='Recovery required', updated_at=? WHERE status IN ('analyzing','planning','executing','reviewing','testing','documenting')",
       )
       .run(new Date().toISOString());
+    this.db.exec(
+      "UPDATE mcp_connections SET status='disconnected' WHERE status='connected'",
+    );
   }
   projects(): Project[] {
     return (
@@ -268,9 +284,92 @@ export class Store {
       )
       .run(key, value);
   }
+  mcpConnections(): McpConnection[] {
+    return (
+      this.db
+        .prepare("SELECT * FROM mcp_connections ORDER BY name")
+        .all() as Record<string, unknown>[]
+    ).map(mcpRow);
+  }
+  mcpConnection(id: string): McpConnection | null {
+    const row = this.db
+      .prepare("SELECT * FROM mcp_connections WHERE id=?")
+      .get(id);
+    return row ? mcpRow(row as Record<string, unknown>) : null;
+  }
+  addMcpConnection(c: McpConnection): void {
+    this.db
+      .prepare("INSERT INTO mcp_connections VALUES(?,?,?,?,?,?,?,?,?)")
+      .run(
+        c.id,
+        c.name,
+        c.transport,
+        c.command,
+        JSON.stringify(c.args),
+        c.status,
+        JSON.stringify(c.tools),
+        c.lastAttemptAt,
+        c.error,
+      );
+  }
+  updateMcpConnection(c: McpConnection): void {
+    this.db
+      .prepare(
+        "UPDATE mcp_connections SET name=?,command=?,args=?,status=?,tools=?,last_attempt_at=?,error=? WHERE id=?",
+      )
+      .run(
+        c.name,
+        c.command,
+        JSON.stringify(c.args),
+        c.status,
+        JSON.stringify(c.tools),
+        c.lastAttemptAt,
+        c.error,
+        c.id,
+      );
+  }
+  removeMcpConnection(id: string): void {
+    this.db.prepare("DELETE FROM mcp_connections WHERE id=?").run(id);
+  }
+  mcpToolPermissions(
+    projectId: string,
+    connectionId: string,
+  ): Record<string, boolean> {
+    const rows = this.db
+      .prepare(
+        "SELECT tool_name,enabled FROM project_mcp_tools WHERE project_id=? AND connection_id=?",
+      )
+      .all(projectId, connectionId) as { tool_name: string; enabled: number }[];
+    return Object.fromEntries(rows.map((r) => [r.tool_name, r.enabled === 1]));
+  }
+  setMcpToolPermission(
+    projectId: string,
+    connectionId: string,
+    toolName: string,
+    enabled: boolean,
+  ): void {
+    this.db
+      .prepare(
+        "INSERT INTO project_mcp_tools VALUES(?,?,?,?) ON CONFLICT(project_id,connection_id,tool_name) DO UPDATE SET enabled=excluded.enabled",
+      )
+      .run(projectId, connectionId, toolName, enabled ? 1 : 0);
+  }
   close(): void {
     this.db.close();
   }
+}
+function mcpRow(r: Record<string, unknown>): McpConnection {
+  return {
+    id: String(r.id),
+    name: String(r.name),
+    transport: "stdio",
+    command: String(r.command),
+    args: JSON.parse(String(r.args)),
+    status: r.status as McpConnection["status"],
+    tools: JSON.parse(String(r.tools)),
+    lastAttemptAt: r.last_attempt_at as string | null,
+    error: r.error as string | null,
+  };
 }
 function projectRow(r: Record<string, unknown>): Project {
   return {

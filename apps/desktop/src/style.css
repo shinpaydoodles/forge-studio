@@ -575,6 +575,66 @@
 .connection b.ok {
   color: #78d1a7;
 }
+.mcp-form {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1.5fr auto;
+  gap: 8px;
+  margin: 14px 0 22px;
+}
+.mcp-form input {
+  min-width: 0;
+}
+.mcp-server {
+  border-top: 1px solid #304052;
+  padding: 16px 0;
+}
+.mcp-server-head,
+.mcp-actions,
+.mcp-tool {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mcp-server-head {
+  justify-content: space-between;
+}
+.mcp-server small,
+.mcp-tool small {
+  display: block;
+  color: #91a5b9;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+.mcp-actions {
+  margin-top: 12px;
+}
+.mcp-actions button {
+  padding: 7px 10px;
+}
+.mcp-tool {
+  justify-content: space-between;
+  border-top: 1px solid #293849;
+  padding: 10px 0;
+}
+.mcp-tool label {
+  white-space: nowrap;
+  font-size: 11px;
+}
+.mcp-tool input {
+  vertical-align: middle;
+}
+.mcp-error {
+  color: #f1b0b8;
+}
+@media (max-width: 900px) {
+  .mcp-form {
+    grid-template-columns: 1fr;
+  }
+  .mcp-tool {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
 .callout {
   display: flex;
   gap: 9px;

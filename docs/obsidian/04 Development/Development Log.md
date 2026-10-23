@@ -17,4 +17,5 @@ tags: [forge-studio, development]
 - In a disposable project, approved an assisted Codex plan and received `EXECUTED_OK`, rejected a second plan, stopped an active manual turn, and confirmed project/task history after UI reload. A reviewed Markdown edit was applied through the UI and verified on disk.
 - Built and installed the NSIS package. Fixed packaged Node startup on paths containing spaces and verified that the native shell launches its loopback runtime.
 - Created and verified a private `shinpaydoodles/forge-studio` repository, then pushed the initial `main` commit.
-- Still to verify: native UI, clean-machine launch, Claude with an API key, Codex command/file tool approval, and external MCP connections.
+- Added a local MCP stdio manager with server add/edit/remove, explicit connect/inspect/disconnect, discovered tool descriptions, and per-project switches. The official SDK connected to a local echo fixture; the browser UI verified connect, discovery, permission toggle, and disconnect. No MCP tools were invoked.
+- Still to verify: native UI, clean-machine launch, Claude with an API key, Codex command/file tool approval, live external MCP servers, and reviewed MCP tool calls.

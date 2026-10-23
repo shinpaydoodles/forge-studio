@@ -27,6 +27,7 @@ import {
   api,
   watchTask,
   type GitInfo,
+  type McpConnection,
   type Note,
   type Project,
   type Task,
@@ -950,8 +951,9 @@ function App() {
             <>
               <Page
                 title="MCP Connections"
-                caption="Supported local integrations and their current setup status."
+                caption="Connect trusted local MCP servers and choose which tools each project may use."
               />
+              <McpPanel projectId={selectedId} />
               <Panel title="Connections">
                 <Connection
                   name="Codex App Server"
@@ -976,12 +978,12 @@ function App() {
                 <Connection
                   name="Roblox Studio MCP"
                   ok={false}
-                  detail="Not configured in this release"
+                  detail="Add a server above when available"
                 />
                 <Connection
                   name="Blender"
                   ok={false}
-                  detail="Not configured in this release"
+                  detail="Add a server above when available"
                 />
                 <Connection
                   name="VS Code"
@@ -1245,6 +1247,204 @@ function Connection({
       </span>
       <b className={ok ? "ok" : ""}>{ok ? "AVAILABLE" : "SETUP"}</b>
     </div>
+  );
+}
+function McpPanel({ projectId }: { projectId: string }) {
+  const [connections, setConnections] = useState<McpConnection[]>([]);
+  const [name, setName] = useState("");
+  const [command, setCommand] = useState("");
+  const [args, setArgs] = useState("");
+  const [permissions, setPermissions] = useState<
+    Record<string, Record<string, boolean>>
+  >({});
+  const [error, setError] = useState("");
+  const refresh = useCallback(async () => {
+    const list = await api<McpConnection[]>("/mcp/connections");
+    setConnections(list);
+    if (projectId) {
+      const entries = await Promise.all(
+        list.map(
+          async (c) =>
+            [
+              c.id,
+              await api<Record<string, boolean>>(
+                `/mcp/connections/${c.id}/permissions?projectId=${projectId}`,
+              ),
+            ] as const,
+        ),
+      );
+      setPermissions(Object.fromEntries(entries));
+    }
+  }, [projectId]);
+  useEffect(() => {
+    void refresh().catch((e) => setError(e.message));
+  }, [refresh]);
+  async function run(operation: () => Promise<unknown>) {
+    try {
+      await operation();
+      setError("");
+      await refresh();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+  return (
+    <Panel title="Local MCP servers">
+      <p className="hint">
+        Adding a server saves its command. Connect launches that command locally
+        and inspects advertised tools. Only add servers you trust. Tools are
+        disabled for every project until enabled here; Forge Studio does not
+        call them yet.
+      </p>
+      {error && <div className="alert error">{error}</div>}
+      <form
+        className="mcp-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void run(async () => {
+            await api("/mcp/connections", {
+              method: "POST",
+              body: JSON.stringify({
+                name,
+                command,
+                args: args.trim() ? JSON.parse(args) : [],
+              }),
+            });
+            setName("");
+            setCommand("");
+            setArgs("");
+          });
+        }}
+      >
+        <input
+          aria-label="Server name"
+          placeholder="Server name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <input
+          aria-label="Executable"
+          placeholder="Executable path or command"
+          value={command}
+          onChange={(e) => setCommand(e.target.value)}
+          required
+        />
+        <input
+          aria-label="Arguments JSON"
+          placeholder='Arguments JSON, e.g. ["server.js"]'
+          value={args}
+          onChange={(e) => setArgs(e.target.value)}
+        />
+        <button className="primary" type="submit">
+          Add server
+        </button>
+      </form>
+      {connections.map((c) => (
+        <div className="mcp-server" key={c.id}>
+          <div className="mcp-server-head">
+            <strong>{c.name}</strong>
+            <span className={`pill ${c.status}`}>{c.status}</span>
+          </div>
+          <small>
+            {c.transport} · {c.tools.length} tools · Last attempt:{" "}
+            {c.lastAttemptAt ? when(c.lastAttemptAt) : "never"}
+          </small>
+          {c.error && <p className="mcp-error">{c.error}</p>}
+          <div className="mcp-actions">
+            {c.status === "connected" ? (
+              <button
+                onClick={() =>
+                  void run(() =>
+                    api(`/mcp/connections/${c.id}/disconnect`, {
+                      method: "POST",
+                    }),
+                  )
+                }
+              >
+                Disconnect
+              </button>
+            ) : (
+              <button
+                onClick={() =>
+                  void run(() =>
+                    api(`/mcp/connections/${c.id}/connect`, { method: "POST" }),
+                  )
+                }
+              >
+                Connect & inspect
+              </button>
+            )}
+            <button
+              onClick={() => {
+                const nextName = window.prompt("Server name", c.name);
+                if (nextName === null) return;
+                const nextCommand = window.prompt("Executable", c.command);
+                if (nextCommand === null) return;
+                const nextArgs = window.prompt(
+                  "Arguments JSON",
+                  JSON.stringify(c.args),
+                );
+                if (nextArgs === null) return;
+                void run(() =>
+                  api(`/mcp/connections/${c.id}`, {
+                    method: "PATCH",
+                    body: JSON.stringify({
+                      name: nextName,
+                      command: nextCommand,
+                      args: JSON.parse(nextArgs),
+                    }),
+                  }),
+                );
+              }}
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm(`Remove ${c.name}?`))
+                  void run(() =>
+                    api(`/mcp/connections/${c.id}`, { method: "DELETE" }),
+                  );
+              }}
+            >
+              Remove
+            </button>
+          </div>
+          {c.tools.map((tool) => (
+            <div className="mcp-tool" key={tool.name}>
+              <div>
+                <strong>{tool.name}</strong>
+                <small>{tool.description || "No description supplied"}</small>
+              </div>
+              <label>
+                <input
+                  type="checkbox"
+                  disabled={!projectId}
+                  checked={!!permissions[c.id]?.[tool.name]}
+                  onChange={(e) =>
+                    void run(() =>
+                      api(`/mcp/connections/${c.id}/permissions`, {
+                        method: "PATCH",
+                        body: JSON.stringify({
+                          projectId,
+                          toolName: tool.name,
+                          enabled: e.target.checked,
+                        }),
+                      }),
+                    )
+                  }
+                />{" "}
+                Enable for project
+              </label>
+            </div>
+          ))}
+        </div>
+      ))}
+      {connections.length === 0 && (
+        <Empty text="No local MCP servers configured." />
+      )}
+    </Panel>
   );
 }
 function TaskRow({ task, click }: { task: Task; click: () => void }) {

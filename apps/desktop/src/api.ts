@@ -45,6 +45,17 @@ export type GitInfo = {
   status: string;
   diff: string;
 };
+export type McpConnection = {
+  id: string;
+  name: string;
+  transport: "stdio";
+  command: string;
+  args: string[];
+  status: "disconnected" | "connected" | "error";
+  tools: { name: string; description?: string; inputSchema?: unknown }[];
+  lastAttemptAt: string | null;
+  error: string | null;
+};
 
 async function credential(): Promise<string> {
   if ("__TAURI_INTERNALS__" in window) {

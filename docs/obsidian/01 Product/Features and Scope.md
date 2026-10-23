@@ -15,6 +15,6 @@ tags: [forge-studio, product]
 | Claude | Agent SDK adapter | Requires separately billed API key; live verification pending |
 | Knowledge | Local Markdown list/search/read and reviewed edit; disposable UI edit passed | No semantic index or automatic sync |
 | Git | Status and unstaged diff | No branch, stage, commit, push UI |
-| MCP/Roblox/Blender | Status shown as unconfigured | Connections and operations are not implemented |
+| MCP/Roblox/Blender | Local stdio discovery and project tool switches | Tool invocation and live Roblox/Blender connection are not implemented |
 
 The interface must show disconnected integrations honestly and preserve project boundaries. [[02 Architecture/Security Model|Security Model]] records current controls and gaps.

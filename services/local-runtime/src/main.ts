@@ -13,6 +13,7 @@ import { TaskManager } from "./tasks.js";
 import { canonicalDirectory } from "./security.js";
 import { listNotes, readNote, replaceNote } from "./knowledge.js";
 import { gitInfo } from "./git.js";
+import { McpManager } from "./mcp.js";
 
 const dataDir =
   process.env.FORGE_DATA_DIR ||
@@ -22,6 +23,7 @@ const dataDir =
   );
 const store = new Store(join(dataDir, "forge.db"));
 const tasks = new TaskManager(store);
+const mcp = new McpManager(store);
 const token = process.env.FORGE_DEV_TOKEN || randomBytes(32).toString("hex");
 const port = Number(process.env.FORGE_PORT || 4317);
 const projectInput = z.object({
@@ -36,6 +38,11 @@ const taskInput = z.object({
   request: z.string().trim().min(1).max(12000),
   provider: z.enum(["codex", "claude"]),
   mode: z.enum(["manual", "assisted"]),
+});
+const mcpInput = z.object({
+  name: z.string().trim().min(1).max(100),
+  command: z.string().trim().min(1).max(500),
+  args: z.array(z.string().max(1000)).max(30).default([]),
 });
 
 function json(res: ServerResponse, status: number, data: unknown): void {
@@ -118,7 +125,10 @@ const server = createServer(async (req, res) => {
         "access-control-allow-headers",
         "authorization,content-type",
       );
-      res.setHeader("access-control-allow-methods", "GET,POST,PATCH,OPTIONS");
+      res.setHeader(
+        "access-control-allow-methods",
+        "GET,POST,PATCH,DELETE,OPTIONS",
+      );
       if (req.method === "OPTIONS") {
         res.writeHead(204);
         res.end();
@@ -136,6 +146,78 @@ const server = createServer(async (req, res) => {
       return json(res, 200, { ok: true });
     if (path === "/api/status" && method === "GET")
       return json(res, 200, await status());
+    if (path === "/api/mcp/connections" && method === "GET")
+      return json(res, 200, store.mcpConnections());
+    if (path === "/api/mcp/connections" && method === "POST") {
+      const input = mcpInput.parse(await body(req));
+      const connection = {
+        ...input,
+        id: randomUUID(),
+        transport: "stdio" as const,
+        status: "disconnected" as const,
+        tools: [],
+        lastAttemptAt: null,
+        error: null,
+      };
+      store.addMcpConnection(connection);
+      return json(res, 201, connection);
+    }
+    const mcpMatch = path.match(
+      /^\/api\/mcp\/connections\/([^/]+)(?:\/(connect|disconnect|permissions))?$/,
+    );
+    if (mcpMatch) {
+      const id = mcpMatch[1]!;
+      const saved = store.mcpConnection(id);
+      if (!saved) throw new Error("MCP connection not found.");
+      const action = mcpMatch[2];
+      if (!action && method === "PATCH") {
+        const input = mcpInput.partial().parse(await body(req));
+        await mcp.disconnect(id);
+        const updated = {
+          ...saved,
+          ...input,
+          status: "disconnected" as const,
+          tools: [],
+          error: null,
+        };
+        store.updateMcpConnection(updated);
+        return json(res, 200, updated);
+      }
+      if (!action && method === "DELETE") {
+        await mcp.disconnect(id);
+        store.removeMcpConnection(id);
+        return json(res, 200, { removed: true });
+      }
+      if (action === "connect" && method === "POST")
+        return json(res, 200, await mcp.connect(id));
+      if (action === "disconnect" && method === "POST") {
+        await mcp.disconnect(id);
+        return json(res, 200, store.mcpConnection(id));
+      }
+      if (action === "permissions" && method === "GET") {
+        const project = projectOrThrow(url.searchParams.get("projectId") || "");
+        return json(res, 200, store.mcpToolPermissions(project.id, id));
+      }
+      if (action === "permissions" && method === "PATCH") {
+        const input = z
+          .object({
+            projectId: z.string().uuid(),
+            toolName: z.string(),
+            enabled: z.boolean(),
+          })
+          .parse(await body(req));
+        projectOrThrow(input.projectId);
+        if (!saved.tools.some((tool) => tool.name === input.toolName))
+          throw new Error("Tool not advertised by this connection.");
+        store.setMcpToolPermission(
+          input.projectId,
+          id,
+          input.toolName,
+          input.enabled,
+        );
+        return json(res, 200, { ok: true });
+      }
+    }
     if (path === "/api/projects" && method === "GET")
       return json(res, 200, store.projects());
     if (path === "/api/projects" && method === "POST") {
@@ -338,6 +420,7 @@ server.listen(port, "127.0.0.1", () =>
   console.log(`Forge runtime listening on 127.0.0.1:${port}`),
 );
 process.on("SIGINT", () => {
+  void mcp.close();
   server.close();
   store.close();
 });

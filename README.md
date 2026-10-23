@@ -4,7 +4,7 @@ Forge Studio is a local-first Windows development workspace for project-scoped A
 
 ## Current status (2026-10-23)
 
-The React interface and Node runtime run locally. Project import/settings, SQLite task and event persistence, manual and plan-first tasks, approvals, cancellation, Markdown browsing and reviewed edits, and Git status/diff are implemented. Real Codex App Server turns streamed through the UI; assisted plan approval, rejection, Stop, and human outcome review were verified. A reviewed Markdown edit was applied through the UI in a disposable folder. The Claude Agent SDK adapter is implemented but cannot be live-tested here without an Anthropic API key. Roblox Studio MCP, Blender, general MCP management, Git write operations, coordinated multi-agent workflows, and automatic documentation edits are planned.
+The React interface and Node runtime run locally. Project import/settings, SQLite task and event persistence, manual and plan-first tasks, approvals, cancellation, Markdown browsing and reviewed edits, and Git status/diff are implemented. Real Codex App Server turns streamed through the UI; assisted plan approval, rejection, Stop, and human outcome review were verified. A reviewed Markdown edit was applied through the UI in a disposable folder. The local MCP manager now saves stdio servers, explicitly connects and inspects tools, disconnects, and stores per-project tool switches. Tool invocation by agents is not yet available. The Claude Agent SDK adapter is implemented but cannot be live-tested here without an Anthropic API key. Roblox Studio MCP, Blender, Git write operations, coordinated multi-agent workflows, and automatic documentation edits are planned.
 
 See [implementation status](docs/development/status.md) for verified evidence and limitations.
 
@@ -49,6 +49,7 @@ The desktop build prepares a private runtime bundle, copies the installed Node e
 3. Run `codex login` before using Codex. The adapter starts the official Codex App Server and uses its existing sign-in.
 4. To use Claude, set `ANTHROPIC_API_KEY` in the environment before starting Forge Studio. Keep the key out of repository files.
 5. Choose Manual to execute immediately, or Assisted to generate a read-only plan and approve it before execution. After the provider finishes, review its response and Git snapshot, then accept or mark the task unsuccessful.
+6. In MCP Connections, add a trusted local stdio server command and its arguments as a JSON array, then choose Connect & inspect. Enabling a discovered tool records project permission for future workflows; no MCP tool calls are made in this release. Avoid putting credentials in command arguments.
 
 ## Architecture
 

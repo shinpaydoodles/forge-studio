@@ -13,7 +13,7 @@ tags: [forge-studio, roadmap]
 | Real agent execution | In progress | Codex and Claude turns stream, request approval, cancel |
 | Knowledge and Git | Partial | Reviewed Markdown edits and safe Git write operations |
 | Private source repository | Complete | Private GitHub repository verified; `main` pushed |
-| MCP framework | Planned | Test server discovery, permissioned tool call |
+| MCP framework | Partial | Local stdio discovery and project switches tested; permissioned tool call remains |
 | Roblox and Blender | Planned | Verified official or vetted connection and test workflow |
 | Coordinated workflows | Planned | Bounded planner, implementer, reviewer, QA, docs stages |
 
